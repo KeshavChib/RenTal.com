@@ -212,8 +212,3 @@ app.get('/bookings', async (req, res) => {
 
 
 app.listen(4000);
-
-// project password
-//    y7O0E7c9gF0Oui1u
-
-// mongodb+srv://Booking:y7O0E7c9gF0Oui1u@cluster0.yyyx2by.mongodb.net/?retryWrites=true&w=majority
