@@ -14,6 +14,7 @@ const fs = require('fs');
 const Place = require('./models/places');
 const { resolve } = require('path');
 const { rejects } = require('assert');
+const { log } = require('console');
 const app = express();
 
 app.use(express.json());
@@ -211,4 +212,6 @@ app.get('/bookings', async (req, res) => {
 });
 
 
-app.listen(4000);
+app.listen(4000, () => {
+    console.log("server started on port 4000");
+});

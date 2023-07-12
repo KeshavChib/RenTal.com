@@ -8,11 +8,14 @@ import BookingsDates from "../BookingsDates";
 
 export default function BookingsPage() {
     const [bookings, setBookings] = useState([]);
+    
     useEffect(() => {
         axios.get('/Bookings').then((responce) => {
             setBookings(responce.data);
         });
     }, []);
+
+
     return (
         <div>
             <AccountNav />
