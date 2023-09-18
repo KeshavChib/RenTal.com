@@ -15,6 +15,8 @@ const Place = require('./models/places');
 const { resolve } = require('path');
 const { rejects } = require('assert');
 const { log } = require('console');
+
+
 const app = express();
 
 app.use(express.json());
@@ -24,9 +26,14 @@ app.use('/uploads', express.static(__dirname + '/uploads'));
 const bcryptSalt = bcrypt.genSaltSync(10);
 const jwtSecret = 'beuvdbkqehrfboirjfcjhbdeu';
 
+// http://127.0.0.1:5173/
+
+
+
 app.use(cors({
     credentials : true,
-    origin : 'http://localhost:5173'
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin : 'http://127.0.0.1:5173'
 }));
 
 
@@ -34,6 +41,9 @@ app.use(cors({
 mongoose.connect(process.env.MONGO_URL);
 
 function getUserDataFromreq(req){
+    const token = req.cookies.token;
+    if(token === undefined) console.log("it is null");
+    else console.log(token);
     return new Promise((resolve, reject) => {
         jwt.verify(req.cookies.token, jwtSecret, {},async (err, userData) => {
             if(err) throw err;
@@ -69,11 +79,17 @@ app.post('/login', async (req,res) => {
         const passOk = bcrypt.compareSync(password, userDoc.password);
         if(passOk){
             jwt.sign({email:userDoc.email , id : userDoc._id}, jwtSecret, {}, (err, token) => {
+                // console.log(token);
                 if(err){
                     throw err;
                 }
                 else{
-                    res.cookie('token', token).json(userDoc);
+                    res.cookie("token", token, {
+                        httpOnly : true,
+                        secure: true, 
+                        sameSite: 'none'
+                    }).json(userDoc);
+                    
                 }
             });
         }
@@ -88,6 +104,7 @@ app.post('/login', async (req,res) => {
 
 app.get('/profile', (req, res) => {
     const {token} = req.cookies;
+    console.log(token);
 
     if(token){
         jwt.verify(token, jwtSecret, {},async (err, userData) => {
@@ -179,7 +196,7 @@ app.put('/places', async (req, res) => {
             if(err) throw err;
             const placeDoc = await Place.findById(id);
             if(userData.id === placeDoc.owner.toString()){
-                placeDoc.set({
+                placeDoc.set({ 
                     title, address, photos:addedPhotos,
                     description, perks, extraInfo,
                     checkIn, checkOut, maxGuests, price
@@ -196,10 +213,11 @@ app.get('/places', async (req, res) => {
 
 app.post('/bookings', async (req, res) => {
     const userData = await getUserDataFromreq(req);
+    // console.log(req.body);
     const {place, checkIn, checkOut, numberOfGuest, name, phone, price} = req.body;
     Booking.create({
         place, checkIn, checkOut, numberOfGuest, name, phone, price, user : userData.id
-    }).then(( doc) => {
+    }).then((doc) => {
         res.json(doc);
     }).catch((err) => {
         throw err;

@@ -11,13 +11,14 @@ export default function BookingWidget({place}) {
     const [checkOut, setCheckOut] = useState('');
     const [noOfGuest, setNoofGuest] = useState(1);
     const [name, setName] = useState('');
-    const [phone, setPhone] = useState();
+    const [phone, setPhone] = useState(1);
     const [redirect, setRedirect] = useState('');
 
     const {user} = useContext(UserContext);
 
     useEffect(() => {
-        setName(user.name);
+        // console.log(user.name);
+        if(user != null) setName(user.name);
     }, [user]);
 
     let noOfNights = 0
